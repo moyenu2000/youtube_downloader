@@ -1,105 +1,56 @@
-// import axios from 'axios';
-// import React, { useEffect, useState } from 'react';
-// import './App.css';
-
-// function App() {
-//   const [students, setStudents] = useState([]);
-//   const [searchTerm, setSearchTerm] = useState('');
-
-//   const fetchData = async () => {
-//     try {
-//       const response = await axios.post(`https://mernbackend-xi.vercel.app/student`, {name: searchTerm});
-//       setStudents(response.data);
-//     } catch (error) {
-//       console.error('There was an error fetching the data', error);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchData();
-//   }, []);
-
-//   return (
-//     <div className="App">
-//       <header className="App-header">
-//         <input
-//           type="text"
-//           placeholder="Search by name"
-//           value={searchTerm}
-//           onChange={(e) => setSearchTerm(e.target.value)}
-//         />
-//         <button onClick={fetchData}>Search</button>
-
-//         <div>
-//           {students.map((student) => (
-//             <div key={student._id} className="student-box">
-//               <p>Registration: {student.Registration}</p>
-//               <p>Name: {student.Name}</p>
-//               <p>College: {student.College}</p>
-//               <p>Result: {student.ResultPassed}</p>
-//             </div>
-//           ))}
-//         </div>
-//       </header>
-//     </div>
-//   );
-// }
-
-// export default App;
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
 function App() {
-  const [students, setStudents] = useState([]);
+  const [videoData, setVideoData] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const fetchData = async () => {
+  const fetchData = async (event) => {
+    event.preventDefault(); // Prevent default form submission behavior
+
     try {
-      const response = await axios.post(`https://mernbackend-xi.vercel.app/student`, {name: searchTerm});
-      setStudents(response.data);
+      console.log('Search term:', searchTerm);
+      const response = await axios.post(`https://youtube-download-server.vercel.app/`, {video_url: searchTerm});
+      setVideoData(response.data);  
+      console.log(response.data);
     } catch (error) {
-      console.error('There was an error fetching the data', error);
+      console.error('Error fetching data:', error);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    // Removed auto-fetch on searchTerm change. Use button click or form submit instead.
   }, []);
 
   return (
-    <div className="container">
-      <header>
-        <h3>Record by Name</h3>
-      </header>
-
-      <form id="searchForm">
-        <label htmlFor="name">Name:</label>
+    <div className="App">
+      <h1>YouTube Video Downloader</h1>
+      <form id="downloadForm" onSubmit={fetchData}>
+        <label htmlFor="video_url">Enter YouTube Video URL:</label>
         <input 
           type="text" 
-          id="name" 
-          name="name" 
-          value={searchTerm} 
-          onChange={(e) => setSearchTerm(e.target.value)} 
+          id="video_url"
+          placeholder="Search..." 
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
         />
-        <input type="button" value="Search" onClick={fetchData} />
+        <button type="submit">Get Formats</button>
       </form>
 
-      <h2>Result:</h2>
-      <div id="result">
-        {students.map((student) => (
-          <div className="record" key={student._id}>
-            <p><strong>Registration:</strong> {student.Registration}</p>
-            <p><strong>Name:</strong> {student.Name}</p>
-            <p><strong>College:</strong> {student.College}</p>
-            <p><strong>Result:</strong> {student.ResultPassed}</p>
-            <hr />
-          </div>
-        ))}
-      </div>
+      <h2 id="videoTitle">{videoData?.fulltitle}</h2>
+      <img id="videoThumbnail" src={videoData?.thumbnail} alt={videoData?.fulltitle} width="200" height="150" />
 
-      <footer>perplexed_me</footer>
+      <ul id="formatsList">
+        {videoData?.formats.map((format, index) => (
+          <li key={index}>
+            <strong>Format: {format.format_note}</strong><br />
+            Resolution: {format.resolution}<br />
+            File Size: {format.filesize}<br />
+            <a href={format.url} target="_blank" rel="noreferrer">Download</a>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
