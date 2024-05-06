@@ -11,7 +11,7 @@ function App() {
 
     try {
       console.log('Search term:', searchTerm);
-      const response = await axios.post(`https://youtube-download-server.vercel.app/ {video_url: searchTerm});
+      const response = await axios.post(`https://flask-hello-world-tan-mu-86.vercel.app/` {video_url: searchTerm});
       setVideoData(response.data);  
       console.log(response.data);
     } catch (error) {
